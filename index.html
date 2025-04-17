@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Satvitel - CRUD y Noticias</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <header class="encabezado container-fluid d-flex justify-content-between align-items-center p-3 mb-4 rounded">
+    <div class="logo">Satvitel - Redes y Telecomunicaciones</div>
+    <nav class="navegacion">
+      <a class="boton" href="#">Inicio</a>
+      <a class="boton" href="#registro">Registro</a>
+      <a class="boton" href="#">Acerca de</a>
+      <a class="boton" href="#">Contáctanos</a>
+    </nav>
+  </header>
+
+  <main class="container principal">
+    <h1 class="titulo-seccion">Noticias</h1>
+
+    <section class="galeria-portafolio row g-3">
+      <div class="tarjeta pequeña">
+        <h2 class="titulo-tarjeta">EAU, Catar y Kuwait, los países con las velocidades de Internet móvil</h2>
+        <img width="350" src="https://img.lalr.co/cms/2024/12/26115827/web_emp_26122024_2.jpg?size=md" alt="Noticia 1" class="imagen-tarjeta">
+        <button class="boton-tarjeta" onclick="window.location.href='https://www.larepublica.co/velocidad-de-internet';">
+          Ver detalles →
+        </button>
+      </div>
+      <div class="tarjeta grande destacada">
+        <span class="etiqueta">Destacado</span>
+        <img width="480" src="https://www.estrategiasdeinversion.com/uploads/noticias_redaccion/2025/febrero/orange_ip.jpg" alt="Noticia 2" class="imagen-tarjeta">
+      </div>
+    </section>
+
+    <section class="galeria-portafolio row g-3">
+      <div class="tarjeta grande destacada">
+        <img width="390" src="https://izc.com.co/pub/media/blog/cache/840x620/magefan_blog/PLACA-BLOG-IZC-2024-Ventajas-de-la-fibra-_ptica-sobre-otros-medios-de-transmisi_n_1.jpg" alt="Noticia 3" class="imagen-tarjeta">
+      </div>
+      <div class="tarjeta pequeña">
+        <h2 class="titulo-tarjeta">Fibra óptica vs otros medios de transmisión</h2>
+        <img width="350" src="https://img.lalr.co/cms/2024/12/26115827/web_emp_26122024_2.jpg?size=md" alt="Noticia 4" class="imagen-tarjeta">
+        <button class="boton-tarjeta" onclick="window.location.href='https://www.larepublica.co/velocidad-de-internet';">
+          Ver detalles →
+        </button>
+      </div>
+    </section>
+
+    <hr class="my-5">
+
+    <h2 class="mb-4" id="registro">Formulario de Registro</h2>
+
+    <div class="row g-4 mb-5">
+      <div class="col-md-4">
+        <h5>Agregar Usuario</h5>
+        <input id="nombreUsuario" placeholder="Nombre" class="form-control mb-2">
+        <input id="correoUsuario" placeholder="Correo" class="form-control mb-2">
+        <button onclick="agregarUsuario()" class="btn btn-success w-100">Agregar Usuario</button>
+      </div>
+      <div class="col-md-4">
+        <h5>Agregar Producto</h5>
+        <input id="nombreProducto" placeholder="Nombre del producto" class="form-control mb-2">
+        <input id="precioProducto" placeholder="Precio" type="number" class="form-control mb-2">
+        <button onclick="agregarProducto()" class="btn btn-success w-100">Agregar Producto</button>
+      </div>
+      <div class="col-md-4">
+        <h5>Agregar Pedido</h5>
+        <input id="idUsuarioPedido" placeholder="ID Usuario" type="number" class="form-control mb-2">
+        <input id="idProductoPedido" placeholder="ID Producto" type="number" class="form-control mb-2">
+        <input id="cantidadPedido" placeholder="Cantidad" type="number" class="form-control mb-2">
+        <button onclick="agregarPedido()" class="btn btn-success w-100">Agregar Pedido</button>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <button onclick="mostrarUsuarios()" class="btn btn-primary me-2">Mostrar Usuarios</button>
+      <button onclick="mostrarProductos()" class="btn btn-primary me-2">Mostrar Productos</button>
+      <button onclick="mostrarPedidos()" class="btn btn-primary">Mostrar Pedidos</button>
+    </div>
+
+    <div id="output"></div>
+
+    <h4 class="mt-5">Datos CRUD (Tablas)</h4>
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Usuarios:</h5>
+        <table class="table table-striped table-bordered">
+          <thead class="table-dark">
+            <tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tablaUsuarios"></tbody>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <h5>Productos:</h5>
+        <table class="table table-striped table-bordered">
+          <thead class="table-dark">
+            <tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tablaProductos"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mt-4">
+      <h5>Pedidos:</h5>
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr><th>Usuario</th><th>Producto</th><th>Cantidad</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tablaPedidos"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
