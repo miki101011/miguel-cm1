@@ -245,5 +245,42 @@ function mostrarUsuarios() {
     }
   };
 
-
+  function mostrarPedidos() {
+    const trans = db.transaction(["pedidos", "usuarios", "productos"], "readonly");
+    const pedidosStore = trans.objectStore("pedidos");
+    const usuariosStore = trans.objectStore("usuarios");
+    const productosStore = trans.objectStore("productos");
+    const tabla = document.getElementById("tablaPedidos");
+    tabla.innerHTML = "";
+  
+    pedidosStore.openCursor().onsuccess = function (e) {
+      const cursor = e.target.result;
+      if (cursor) {
+        const pedido = cursor.value;
+  
+        // Obtener usuario y producto relacionados
+        usuariosStore.get(pedido.idUsuario).onsuccess = function (userEvent) {
+          productosStore.get(pedido.idProducto).onsuccess = function (prodEvent) {
+            const usuario = userEvent.target.result;
+            const producto = prodEvent.target.result;
+  
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+              <td>${usuario?.nombre || `ID: ${pedido.idUsuario}`}</td>
+              <td>${producto?.nombre || `ID: ${pedido.idProducto}`}</td>
+              <td>${pedido.cantidad}</td>
+              <td>
+                <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('pedidos', ${pedido.id})">Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarDato('pedidos', ${pedido.id})">Eliminar</button>
+              </td>
+            `;
+            tabla.appendChild(fila);
+          };
+        };
+  
+        cursor.continue();
+      }
+    };
+  }
+  
 }
