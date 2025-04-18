@@ -7,7 +7,6 @@ const DB_NAME = 'miBaseDatos';
 const DB_VERSION = 1;
 let db;
 
-// Abrir conexión a IndexedDB
 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
 request.onerror = function (event) {
@@ -22,7 +21,6 @@ request.onsuccess = function (event) {
 request.onupgradeneeded = function (event) {
   db = event.target.result;
 
-  // Crear object stores
   if (!db.objectStoreNames.contains('usuarios')) {
     db.createObjectStore('usuarios', { keyPath: 'id', autoIncrement: true });
   }
@@ -37,10 +35,6 @@ request.onupgradeneeded = function (event) {
     store.createIndex('idProducto', 'idProducto', { unique: false });
   }
 };
-
-// ================================
-// Funciones CRUD reutilizables
-// ================================
 
 function agregarDato(storeName, data) {
   const transaction = db.transaction([storeName], 'readwrite');
@@ -78,31 +72,18 @@ function eliminarDato(storeName, id) {
   request.onerror = (e) => console.error('Error al eliminar de', storeName, e.target.error);
 }
 
-
-
-// agregarDato('usuarios', { nombre: 'Miki', correo: 'miki@gmail.com' });
-// agregarDato('productos', { nombre: 'Router Tplink', precio: 100 });
-// agregarDato('pedidos', { idUsuario: 1, idProducto: 1, cantidad: 2 });
-
-// obtenerTodos('usuarios', (data) => console.log('Usuarios:', data));
-// obtenerTodos('pedidos', (data) => console.log('Pedidos:', data));
-
-
-// AGREGAR USUARIO
 function agregarUsuario() {
   const nombre = document.getElementById("nombreUsuario").value;
   const correo = document.getElementById("correoUsuario").value;
   agregarDato("usuarios", { nombre, correo });
 }
 
-// AGREGAR PRODUCTO
 function agregarProducto() {
   const nombre = document.getElementById("nombreProducto").value;
   const precio = parseFloat(document.getElementById("precioProducto").value);
   agregarDato("productos", { nombre, precio });
 }
 
-// AGREGAR PEDIDO
 function agregarPedido() {
   const idUsuario = parseInt(document.getElementById("idUsuarioPedido").value);
   const idProducto = parseInt(document.getElementById("idProductoPedido").value);
@@ -110,48 +91,57 @@ function agregarPedido() {
   agregarDato("pedidos", { idUsuario, idProducto, cantidad });
 }
 
-// MOSTRAR DATOS
 function mostrarUsuarios() {
-  obtenerTodos("usuarios", (data) => mostrarEnPantalla("Usuarios", data));
-}
-function mostrarProductos() {
-  obtenerTodos("productos", (data) => mostrarEnPantalla("Productos", data));
-}
-function mostrarPedidos() { 
-  obtenerTodos("pedidos", (data) => mostrarEnPantalla("Pedidos", data));
-}
+  const trans = db.transaction("usuarios", "readonly");
+  const store = trans.objectStore("usuarios");
+  const tabla = document.getElementById("tablaUsuarios");
+  tabla.innerHTML = "";
 
-// MOSTRAR EN DIV OUTPUT
-function mostrarEnPantalla(titulo, datos) {
-  const contenedor = document.getElementById("output");
-  contenedor.innerHTML = `<h5>${titulo}:</h5><pre>${JSON.stringify(datos, null, 2)}</pre>`;
-}
-
-
-// ======================= NUEVO: CRUD con openCursor =======================
-
-function mostrarConCursor(storeName) {
-  const transaction = db.transaction([storeName], 'readonly');
-  const store = transaction.objectStore(storeName);
-  const request = store.openCursor();
-  const contenedor = document.getElementById("output");
-  contenedor.innerHTML = `<h5>${storeName.charAt(0).toUpperCase() + storeName.slice(1)}:</h5>`;
-
-  request.onsuccess = (event) => {
-    const cursor = event.target.result;
+  store.openCursor().onsuccess = function (e) {
+    const cursor = e.target.result;
     if (cursor) {
-      const item = cursor.value;
-      contenedor.innerHTML += `
-        <div class="mb-3 p-2 border border-light rounded">
-          <pre>${JSON.stringify(item, null, 2)}</pre>
-          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('${storeName}', ${item.id})">Editar</button>
-          <button class="btn btn-sm btn-danger" onclick="eliminarDato('${storeName}', ${item.id})">Eliminar</button>
-        </div>`;
+      const usuario = cursor.value;
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${usuario.id}</td>
+        <td>${usuario.nombre}</td>
+        <td>${usuario.correo}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('usuarios', ${usuario.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarDato('usuarios', ${usuario.id})">Eliminar</button>
+        </td>
+      `;
+      tabla.appendChild(fila);
       cursor.continue();
     }
   };
 }
 
+function mostrarProductos() {
+  const trans = db.transaction("productos", "readonly");
+  const store = trans.objectStore("productos");
+  const tabla = document.getElementById("tablaProductos");
+  tabla.innerHTML = "";
+
+  store.openCursor().onsuccess = function (e) {
+    const cursor = e.target.result;
+    if (cursor) {
+      const producto = cursor.value;
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${producto.id}</td>
+        <td>${producto.nombre}</td>
+        <td>${producto.precio}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('productos', ${producto.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarDato('productos', ${producto.id})">Eliminar</button>
+        </td>
+      `;
+      tabla.appendChild(fila);
+      cursor.continue();
+    }
+  };
+}
 
 function mostrarPedidos() {
   const tabla = document.getElementById("tablaPedidos");
@@ -177,8 +167,8 @@ function mostrarPedidos() {
 
           const fila = document.createElement("tr");
           fila.innerHTML = `
-            <td>${usuario ? usuario.nombre : `ID ${pedido.idUsuario}`}</td>
-            <td>${producto ? producto.nombre : `ID ${pedido.idProducto}`}</td>
+            <td>${usuario ? usuario.nombre : \`ID ${pedido.idUsuario}\`}</td>
+            <td>${producto ? producto.nombre : \`ID ${pedido.idProducto}\`}</td>
             <td>${pedido.cantidad}</td>
             <td>
               <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('pedidos', ${pedido.id})">Editar</button>
@@ -187,14 +177,12 @@ function mostrarPedidos() {
           `;
           tabla.appendChild(fila);
 
-          cursor.continue(); // sigue con el siguiente
+          cursor.continue();
         };
       };
     }
   };
 }
-
-
 
 function editarFormulario(storeName, id) {
   const transaction = db.transaction([storeName], 'readonly');
@@ -229,66 +217,24 @@ function guardarEdicion(storeName, id) {
   mostrarConCursor(storeName);
 }
 
-// Reemplazar mostrarX por versiones con openCursor
-//function mostrarUsuarios() { mostrarConCursor("usuarios"); }
-//function mostrarProductos() { mostrarConCursor("productos"); }
-//function mostrarPedidos() { mostrarConCursor("pedidos"); }
-//mikisss
+function mostrarConCursor(storeName) {
+  const transaction = db.transaction([storeName], 'readonly');
+  const store = transaction.objectStore(storeName);
+  const request = store.openCursor();
+  const contenedor = document.getElementById("output");
+  contenedor.innerHTML = `<h5>${storeName.charAt(0).toUpperCase() + storeName.slice(1)}:</h5>`;
 
-
-
-function mostrarProductos() {
-  const trans = db.transaction("productos", "readonly");
-  const store = trans.objectStore("productos");
-  const tabla = document.getElementById("tablaProductos");
-  tabla.innerHTML = "";
-
-  store.openCursor().onsuccess = function (e) {
-    const cursor = e.target.result;
+  request.onsuccess = (event) => {
+    const cursor = event.target.result;
     if (cursor) {
-      const producto = cursor.value;
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${producto.id}</td>
-        <td>${producto.nombre}</td>
-        <td>${producto.precio}</td>
-        <td>
-          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('productos', ${producto.id})">Editar</button>
-          <button class="btn btn-sm btn-danger" onclick="eliminarDato('productos', ${producto.id})">Eliminar</button>
-        </td>
-      `;
-      tabla.appendChild(fila);
+      const item = cursor.value;
+      contenedor.innerHTML += `
+        <div class="mb-3 p-2 border border-light rounded">
+          <pre>${JSON.stringify(item, null, 2)}</pre>
+          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('${storeName}', ${item.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarDato('${storeName}', ${item.id})">Eliminar</button>
+        </div>`;
       cursor.continue();
     }
   };
 }
-
-
-function mostrarUsuarios() {
-  const trans = db.transaction("usuarios", "readonly");
-  const store = trans.objectStore("usuarios");
-  const tabla = document.getElementById("tablaUsuarios");
-  tabla.innerHTML = "";
-
-  store.openCursor().onsuccess = function (e) {
-    const cursor = e.target.result;
-    if (cursor) {
-      const usuario = cursor.value;
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${usuario.id}</td>
-        <td>${usuario.nombre}</td>
-        <td>${usuario.correo}</td>
-        <td>
-          <button class="btn btn-sm btn-warning me-2" onclick="editarFormulario('usuarios', ${usuario.id})">Editar</button>
-          <button class="btn btn-sm btn-danger" onclick="eliminarDato('usuarios', ${usuario.id})">Eliminar</button>
-        </td>
-      `;
-      tabla.appendChild(fila);
-      cursor.continue();
-    }
-  };
-
-  
-  
-} 
